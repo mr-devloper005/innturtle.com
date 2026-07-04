@@ -2,13 +2,12 @@ import type { CSSProperties } from 'react'
 import type { TaskKey } from '@/lib/site-config'
 
 /*
-  Yelp-style task surfaces.
+  Marketplace task surfaces.
 
-  Every task (archive + detail) now shares one cohesive premium identity:
-  clean white surfaces, the signature Yelp red accent, hairline gray borders
-  and a single crisp sans-serif — exactly like Yelp. Per-task copy (kicker /
-  note) still varies so each section keeps a little voice, but the visual
-  language is unified. Tokens are delivered via CSS variables (`--tk-*`).
+  Each task route shares the same white + plum storefront identity as the home
+  page while still allowing slightly different section copy. Tokens are exposed
+  via `--tk-*` so archive/detail layouts can stay editable without touching
+  route or fetch logic.
 */
 
 export type TaskTheme = {
@@ -32,34 +31,33 @@ export type TaskTheme = {
   radius: string
 }
 
-const YELP_FONT = "'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+const MARKET_FONT = "'Space Grotesk', 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
 
-// Shared Yelp palette — every task inherits this; only kicker/note differ.
 const base = {
   dark: false,
-  fontDisplay: YELP_FONT,
-  fontBody: YELP_FONT,
-  bg: '#ffffff',
+  fontDisplay: MARKET_FONT,
+  fontBody: MARKET_FONT,
+  bg: '#fffaf9',
   surface: '#ffffff',
-  raised: '#f7f7f7',
-  text: '#1a1a1a',
-  muted: '#6b6b6b',
-  line: '#e6e6e6',
-  accent: '#d32323',
-  accentSoft: '#fdecec',
+  raised: '#f7f2f5',
+  text: '#241f33',
+  muted: '#665c77',
+  line: '#eadfe8',
+  accent: '#432e54',
+  accentSoft: '#f5e6e6',
   onAccent: '#ffffff',
-  glow: 'rgba(211,35,35,0.06)',
-  radius: '0.75rem',
+  glow: 'rgba(174,68,90,0.1)',
+  radius: '1.5rem',
 } satisfies Omit<TaskTheme, 'kicker' | 'note'>
 
 export const taskThemes: Record<TaskKey, TaskTheme> = {
-  article: { ...base, kicker: 'Articles', note: 'In-depth reads, guides and stories worth your time.' },
-  listing: { ...base, kicker: 'Businesses', note: 'Find, compare and connect with local businesses.' },
-  classified: { ...base, kicker: 'Marketplace', note: 'Fresh offers and listings, ready to act on.' },
-  image: { ...base, kicker: 'Photos', note: 'A visual feed of standout images and galleries.' },
-  sbm: { ...base, kicker: 'Bookmarks', note: 'Curated resources and links worth saving.' },
-  pdf: { ...base, kicker: 'Documents', note: 'Downloadable guides, reports and references.' },
-  profile: { ...base, kicker: 'People', note: 'Discover creators, businesses and profiles.' },
+  article: { ...base, kicker: 'Insights', note: 'Guides, updates, and stories arranged like a modern storefront.' },
+  listing: { ...base, kicker: 'Vendor index', note: 'Compare local businesses through a cleaner directory-style shelf.' },
+  classified: { ...base, kicker: 'Offers', note: 'Fast-moving posts highlighted with clear pricing and actions.' },
+  image: { ...base, kicker: 'Visuals', note: 'Image-first discovery with a gallery layout and richer media pacing.' },
+  sbm: { ...base, kicker: 'Resources', note: 'Useful links and saved finds collected in one simple stream.' },
+  pdf: { ...base, kicker: 'Documents', note: 'Downloadable files presented with a polished workspace feel.' },
+  profile: { ...base, kicker: 'Profiles', note: 'People and teams surfaced with a premium catalog treatment.' },
 }
 
 export function getTaskTheme(task: TaskKey): TaskTheme {

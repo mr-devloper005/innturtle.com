@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Filter, Search } from 'lucide-react'
 import { buildPageMetadata } from '@/lib/seo'
+import { Ads } from '@/lib/ads'
 import { fetchSiteFeed } from '@/lib/site-connector'
 import { getPostTaskKey } from '@/lib/task-data'
 import { getMockPostsForTask } from '@/lib/mock-posts'
@@ -21,15 +22,17 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const stripHtml = (value: string) => value.replace(/<[^>]*>/g, ' ')
-const compactText = (value: unknown) => typeof value === 'string' ? stripHtml(value).replace(/\s+/g, ' ').trim().toLowerCase() : ''
-const getContent = (post: SitePost) => post.content && typeof post.content === 'object' ? post.content as Record<string, unknown> : {}
+const compactText = (value: unknown) => (typeof value === 'string' ? stripHtml(value).replace(/\s+/g, ' ').trim().toLowerCase() : '')
+const getContent = (post: SitePost) => (post.content && typeof post.content === 'object' ? (post.content as Record<string, unknown>) : {})
+const compactRaw = (value: unknown) => (typeof value === 'string' ? value.trim() : '')
+
 const getImage = (post: SitePost) => {
   const content = getContent(post)
   const media = Array.isArray(post.media) ? post.media.find((item) => typeof item?.url === 'string')?.url : ''
-  const images = Array.isArray(content.images) ? content.images.find((item) => typeof item === 'string') as string | undefined : ''
+  const images = Array.isArray(content.images) ? (content.images.find((item) => typeof item === 'string') as string | undefined) : ''
   return media || compactRaw(content.featuredImage) || compactRaw(content.image) || compactRaw(content.thumbnail) || images || ''
 }
-const compactRaw = (value: unknown) => typeof value === 'string' ? value.trim() : ''
+
 const summaryOf = (post: SitePost) => post.summary || compactRaw(getContent(post).description) || compactRaw(getContent(post).excerpt) || ''
 
 const matches = (post: SitePost, query: string, category: string, task: string) => {
@@ -48,10 +51,11 @@ const matches = (post: SitePost, query: string, category: string, task: string) 
 
 function SearchResultCard({ post, index }: { post: SitePost; index: number }) {
   const task = getPostTaskKey(post) as TaskKey | null
-  // Route from the task config (e.g. /listing/<slug>); buildPostUrl can fall
-  // back to /posts for tasks missing from the enabled taskViews map, which 404s.
+
   const taskRoute = SITE_CONFIG.tasks.find((item) => item.key === task)?.route
-  const href = `${taskRoute || `/${task || 'article'}`}/${post.slug}`
+  const baseHref = taskRoute || `/${task || 'article'}`
+  const slug = typeof post.slug === 'string' ? post.slug.trim() : ''
+  const href = slug ? `${baseHref}/${slug}` : baseHref
   const image = getImage(post)
   const summary = summaryOf(post)
   const taskLabel = SITE_CONFIG.tasks.find((item) => item.key === task)?.label || 'Post'
@@ -86,7 +90,6 @@ export default async function SearchPage({ searchParams }: { searchParams?: Prom
   const feed = await fetchSiteFeed(useMaster ? 1000 : 300, useMaster ? { fresh: true, category: category || undefined, task: task || undefined } : undefined)
   const posts = feed?.posts?.length ? feed.posts : useMaster ? [] : SITE_CONFIG.tasks.filter((item) => item.enabled).flatMap((item) => getMockPostsForTask(item.key))
   const results = posts.filter((post) => matches(post, normalized, category, task)).slice(0, normalized ? 80 : 36)
-  const enabledTasks = SITE_CONFIG.tasks.filter((item) => item.enabled)
 
   return (
     <EditableSiteShell>
@@ -111,17 +114,21 @@ export default async function SearchPage({ searchParams }: { searchParams?: Prom
                 </label>
                 <select name="task" defaultValue={task} className="rounded-2xl border border-[var(--editable-border)] bg-white px-4 py-3 text-sm font-black outline-none">
                   <option value="">All content types</option>
-                  {enabledTasks.map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}
+                  {SITE_CONFIG.tasks.filter((item) => item.enabled).map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}
                 </select>
               </div>
               <button className="mt-3 inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[var(--editable-page-text,#2f1d16)] px-6 text-sm font-black uppercase tracking-[0.18em] text-[var(--editable-page-bg,#fff7ee)] transition hover:-translate-y-0.5" type="submit">Search</button>
             </form>
           </div>
 
+          <div className="mx-auto max-w-6xl px-4 py-6">
+            <Ads slot="header" showLabel eager className="mx-auto w-full" />
+          </div>
+
           <div className="mt-10 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.24em] opacity-50">{results.length} results</p>
-              <h2 className="mt-2 text-3xl font-black tracking-[-0.06em]">{query ? `Results for “${query}”` : pagesContent.search.resultsTitle}</h2>
+              <h2 className="mt-2 text-3xl font-black tracking-[-0.06em]">{query ? `Results for "${query}"` : pagesContent.search.resultsTitle}</h2>
             </div>
             <Link href="/article" className="inline-flex items-center gap-2 rounded-full border border-[var(--editable-border)] bg-white px-5 py-3 text-sm font-black">Browse latest <ArrowRight className="h-4 w-4" /></Link>
           </div>

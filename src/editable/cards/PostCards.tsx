@@ -31,7 +31,8 @@ export function getEditableCategory(post?: SitePost | null) {
 }
 
 export function postHref(task: TaskKey, post: SitePost, route = `/${task}`) {
-  return `${route}/${post.slug}`
+  const slug = typeof post.slug === 'string' ? post.slug.trim() : ''
+  return slug ? `${route}/${slug}` : route
 }
 
 export function EditorialFeatureCard({ post, href, label = 'Featured read' }: { post: SitePost; href: string; label?: string }) {
