@@ -29,8 +29,6 @@ export function EditableArticleComments({ slug, comments = [] }: { slug: string;
   const [name, setName] = useState('')
   const [text, setText] = useState('')
 
-  // Load this article's comments after mount (initial render stays in sync with
-  // the server so there's no hydration mismatch).
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(storageKey(slug))
@@ -45,7 +43,7 @@ export function EditableArticleComments({ slug, comments = [] }: { slug: string;
     try {
       window.localStorage.setItem(storageKey(slug), JSON.stringify(next))
     } catch {
-      /* storage unavailable — keep the in-memory list */
+      /* storage unavailable */
     }
   }
 
@@ -63,37 +61,36 @@ export function EditableArticleComments({ slug, comments = [] }: { slug: string;
     setText('')
   }
 
-  // User comments (newest first) sit above any existing comments.
   const all = useMemo(() => [...stored, ...comments], [stored, comments])
 
   return (
-    <section className="mt-14 border-t border-[var(--tk-line)] pt-10">
+    <section className="rounded-[1.9rem] border border-[var(--tk-line)] bg-white p-6 shadow-[0_12px_30px_rgba(67,46,84,0.05)] sm:p-8">
       <div className="flex items-center gap-2 text-lg font-semibold">
         <MessageCircle className="h-5 w-5 text-[var(--tk-accent)]" /> Comments
         <span className="text-[var(--tk-muted)]">({all.length})</span>
       </div>
 
-      <form onSubmit={submit} className="mt-6 rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-5">
+      <form onSubmit={submit} className="mt-6 rounded-[1.5rem] bg-[var(--tk-raised)] p-5">
         <input
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Your name (optional)"
           maxLength={60}
-          className="h-11 w-full rounded-lg border border-[var(--tk-line)] bg-[var(--tk-bg)] px-4 text-sm text-[var(--tk-text)] outline-none transition focus:border-[var(--tk-accent)]"
+          className="h-11 w-full rounded-full border border-[var(--tk-line)] bg-white px-4 text-sm text-[var(--tk-text)] outline-none transition focus:border-[var(--tk-accent)]"
         />
         <textarea
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="Share your thoughts…"
+          placeholder="Share your thoughts..."
           rows={3}
           maxLength={1500}
-          className="mt-3 w-full resize-y rounded-lg border border-[var(--tk-line)] bg-[var(--tk-bg)] px-4 py-3 text-sm leading-6 text-[var(--tk-text)] outline-none transition focus:border-[var(--tk-accent)]"
+          className="mt-3 w-full resize-y rounded-[1.25rem] border border-[var(--tk-line)] bg-white px-4 py-3 text-sm leading-6 text-[var(--tk-text)] outline-none transition focus:border-[var(--tk-accent)]"
         />
         <div className="mt-3 flex justify-end">
           <button
             type="submit"
             disabled={!text.trim()}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--tk-accent)] px-6 py-2.5 text-sm font-bold text-[var(--tk-on-accent)] transition hover:brightness-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full bg-[var(--tk-accent)] px-6 py-2.5 text-sm font-bold text-[var(--tk-on-accent)] transition hover:brightness-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Send className="h-4 w-4" /> Post comment
           </button>
@@ -102,7 +99,7 @@ export function EditableArticleComments({ slug, comments = [] }: { slug: string;
 
       <div className="mt-6 grid gap-3">
         {all.map((comment) => (
-          <div key={comment.id} className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-5">
+          <div key={comment.id} className="rounded-[1.5rem] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-5">
             <div className="flex items-center gap-3">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--tk-accent-soft)] text-sm font-bold text-[var(--tk-accent)]">
                 {initial(comment.name)}

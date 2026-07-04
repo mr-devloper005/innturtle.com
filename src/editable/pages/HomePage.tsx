@@ -4,6 +4,7 @@ import { SITE_CONFIG, type TaskKey } from '@/lib/site-config'
 import { buildPageMetadata } from '@/lib/seo'
 import { fetchHomeTaskFeed, fetchHomeTimeSections, type HomeTimeSection } from '@/lib/task-data'
 import { pagesContent } from '@/editable/content/pages.content'
+import { getPublicTasks } from '@/editable/content/public-tasks'
 import type { SitePost } from '@/lib/site-connector'
 import { EditableHomeCta, EditableHomeHero, EditableMagazineSplit, EditableStoryRail, EditableTimeCollections } from '@/editable/sections/HomeSections'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
@@ -29,7 +30,7 @@ function uniquePosts(posts: SitePost[]) {
 }
 
 export default async function HomePage() {
-  const primaryTask = (SITE_CONFIG.tasks.find((task) => task.enabled)?.key || 'article') as TaskKey
+  const primaryTask = (getPublicTasks()[0]?.key || 'article') as TaskKey
   const primaryRoute = SITE_CONFIG.taskViews[primaryTask] || `/${primaryTask}`
   const taskFeed: TaskFeedItem[] = await fetchHomeTaskFeed(12, { timeoutMs: 2500 })
   const primaryPosts = uniquePosts(taskFeed.find(({ task }) => task.key === primaryTask)?.posts || taskFeed.flatMap(({ posts }) => posts)).slice(0, 24)
@@ -64,7 +65,6 @@ export default async function HomePage() {
       <div className="mx-auto max-w-6xl px-4 py-6">
   <Ads slot="sidebar" showLabel eager className="mx-auto w-full" />
 </div>
-      <EditableHomeCta />
       </main>
     </EditableSiteShell>
   )

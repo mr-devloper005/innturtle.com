@@ -114,7 +114,7 @@ export default function CreatePage() {
               <h1 className="mt-5 text-5xl font-black leading-[0.92] tracking-[-0.08em] sm:text-7xl">{pagesContent.create.hero.title}</h1>
               <p className="mt-6 max-w-xl text-base font-semibold leading-8 opacity-70">{pagesContent.create.hero.description}</p>
               <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                {enabledTasks.map((item) => {
+                {enabledTasks.filter((item) => !['classified', 'profile'].includes(item.key)).map((item) => {
                   const Icon = taskIcon[item.key] || FileText
                   const active = item.key === task
                   return (
